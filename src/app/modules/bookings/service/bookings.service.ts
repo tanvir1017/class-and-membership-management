@@ -93,10 +93,10 @@ const enrollTrainee = async (classId: string, trainee: JwtPayload) => {
     // Check if the class has space
     const totalBookings = existingBooking?.traineeId.length;
 
-    if (totalBookings >= 2) {
+    if (totalBookings >= 10) {
       throw new AppError(
         StatusCodes.BAD_GATEWAY,
-        "Class is full. No more trainees can be added.",
+        "Class schedule is full. Maximum 10 trainees allowed per schedule.",
       );
     }
 
@@ -128,15 +128,76 @@ const enrollTrainee = async (classId: string, trainee: JwtPayload) => {
   }
 };
 
-// get all booking class
-export const getAllBookingClass = async () => {
+// ** get all booking class
+const getAllBookingClass = async () => {
   const booking = await Booking.find().populate("classId");
   // .populate("traineeId");
-
   return booking;
+};
+
+// ** cancel booking service
+const cancelBookingService = async (bookingId: string, trainee: JwtPayload) => {
+  // Find the booking and populate the classId reference
+  const booking = await Booking.findById(bookingId);
+  if (!booking) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Booking not found");
+  }
+
+  // If there are no more trainees, delete the booking
+  if (booking.traineeId.length === 0) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "There is nothing to cancel");
+  }
+
+  const { accessToken } = trainee;
+  // Verify the trainee
+  const verifyTrainee = verifyToken(
+    accessToken,
+    env.JWT_ACCESS_TOKEN as string,
+  );
+
+  // Check if the user is a trainee
+  const traineeObjectId = await User.findOne({
+    email: verifyTrainee.userEmail,
+    role: "trainee",
+  }).select("_id");
+
+  if (!traineeObjectId) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Trainee not found");
+  }
+
+  // Ensure the logged-in trainee is in the booking's traineeId array
+  const traineeIndex = booking.traineeId.indexOf(
+    traineeObjectId._id as unknown as Schema.Types.ObjectId,
+  );
+
+  if (traineeIndex === -1) {
+    throw new AppError(
+      StatusCodes.FORBIDDEN,
+      "Unauthorized to cancel this booking",
+    );
+  }
+
+  const bookedClassSchedule = booking.classId as unknown as TClassSchedule;
+  // Check if the class has already started
+  const now = new Date();
+  const classStartTime = new Date(bookedClassSchedule.startTime);
+
+  if (now >= classStartTime) {
+    throw new AppError(
+      StatusCodes.BAD_REQUEST,
+      "Cannot cancel after class has started",
+    );
+  }
+
+  // Remove the trainee from the booking's traineeId array
+  booking.traineeId.splice(traineeIndex, 1);
+  const result = await booking.save();
+
+  return result;
 };
 
 export const BookingsService = {
   enrollTrainee,
   getAllBookingClass,
+  cancelBookingService,
 };

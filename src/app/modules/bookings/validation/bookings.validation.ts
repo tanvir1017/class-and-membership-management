@@ -8,3 +8,10 @@ export const CreateBookingSchema = z.object({
     status: z.enum(["confirmed", "canceled"]).default("confirmed"),
   }),
 });
+
+// ✅ Cancel Schema Validation
+export const CancelBookingSchema = z.object({
+  body: z.object({
+    bookingId: z.string(),
+  }),
+});

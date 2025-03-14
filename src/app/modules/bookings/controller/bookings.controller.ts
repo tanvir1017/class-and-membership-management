@@ -28,7 +28,25 @@ export const getAllBookingClass = asyncHandler(async (req, res) => {
   });
 });
 
+// cancel booking
+export const cancelBooking = asyncHandler(async (req, res) => {
+  const { bookingId } = req.body;
+  const trainee = req.cookies;
+  const booking = await BookingsService.cancelBookingService(
+    bookingId,
+    trainee,
+  );
+
+  sendResponse(res, {
+    statuscode: StatusCodes.OK,
+    success: true,
+    message: "Booking has been successfully cancelled.",
+    data: booking,
+  });
+});
+
 export const BookingControllers = {
   createBooking,
   getAllBookingClass,
+  cancelBooking,
 };

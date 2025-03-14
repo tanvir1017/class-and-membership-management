@@ -2,7 +2,10 @@ import { Router } from "express";
 import { authGuard } from "../../../middleware/auth";
 import sanitizeClientDataViaZod from "../../../middleware/sanitizeClientDataViaZod";
 import { BookingControllers } from "../controller/bookings.controller";
-import { CreateBookingSchema } from "../validation/bookings.validation";
+import {
+  CancelBookingSchema,
+  CreateBookingSchema,
+} from "../validation/bookings.validation";
 
 const router = Router();
 
@@ -19,5 +22,11 @@ router.route("/create").post(
 );
 
 router.route("/").get(BookingControllers.getAllBookingClass);
+router
+  .route("/cancel")
+  .delete(
+    sanitizeClientDataViaZod(CancelBookingSchema),
+    BookingControllers.cancelBooking,
+  );
 
 export const BookingRoutes = router;
