@@ -24,6 +24,15 @@ This system is designed to manage gym class schedules, bookings, and memberships
 - **Trainees cannot book multiple classes at the same time**.
 - **Trainees can cancel their bookings** if the class has not already started.
 
+## Example Workflow
+
+1. **Login**: Trainee or Admin logs in using their credentials to obtain a JWT token.
+2. **Book a Class**: A Trainee can view available classes and book one if there are slots.
+3. **Cancel Booking**: A Trainee can cancel their booking as long as the class has not yet started.
+4. **Admin Class Scheduling**: Admin schedules a new class, and assigns trainers to the class.
+
+---
+
 ## Setup Instructions
 
 1. Clone the repository and navigate:
@@ -56,24 +65,142 @@ JWT_REFRESH_EXPIRES_IN = null
 ADMIN_PASSWORD = null
 ```
 
+Or, for a complete list of environment variables, visit: [📄 Environment Configuration Guide](https://docs.google.com/document/d/1B5ER5e82lgxxRyQ0FnwriQPvoff2IsBwLQIB5GChgoI/edit?usp=sharing)”
+
 4. Now start the project by putting this command on terminal
 
 ```bash
 npm start:dev
 ```
 
-## Example Workflow
+---
 
-1. **Login**: Trainee or Admin logs in using their credentials to obtain a JWT token.
-2. **Book a Class**: A Trainee can view available classes and book one if there are slots.
-3. **Cancel Booking**: A Trainee can cancel their booking as long as the class has not yet started.
-4. **Admin Class Scheduling**: Admin schedules a new class, and assigns trainers to the class.
+## Explaining how endpoints are work ✨
+
+**Login Credentials:**
+
+- **Email:** admin1017@admin.com
+- **Password:** @admin1017
+
+**API Endpoint:**  
+POST `auth/login`
+
+---
+
+**API Endpoint: Create-Admin**  
+POST `/users/create-user`
+
+**Request Body:**
+
+```json
+{
+  "name": {
+    "firstName": "John",
+    "lastName": "Doe"
+  },
+  "email": "johndoe5@example.com",
+  "password": "754800",
+  "role": "trainer",
+  "profileImg": "https://example.com/profile.jpg",
+  "gender": "male",
+  "isDeleted": false
+}
+```
+
+**_NOTE_**: Same thing for `http://localhost:8080/api/v1/users/create-trainee` this route, but no authorization needed.
+
+---
+
+**API Endpoint:**  
+PATCH `/users/change-role`
+
+**Request Body:**
+
+```json
+{
+  "email": "johndoe@example.com",
+  "role": "trainer"
+}
+```
+
+---
+
+**API Endpoint: Update user**  
+PATCH `/users/:userID/update`
+
+**Request Body:**
+
+```json
+{
+  "name": {
+    "firstName": "Tanvir",
+    "lastName": "Hossain"
+  },
+  "email": "tanvirhossain.1017@gmail.com",
+  "isDeleted": true
+}
+```
+
+---
+
+**API Endpoint: Create a classes schedule**  
+POST `/classes/schedule`
+
+**Request Body:**
+
+```json
+{
+  "name": "Yoga Class for Beginners",
+  "date": "20-05-2025", // Date in dd-mm-yyyy format
+  "startTime": "15:00", // Start time in HH:mm format
+  "endTime": "19:00" // End time in HH:mm format
+}
+```
+
+---
+
+**API Endpoint: Assign trainers**  
+PATCH `/classes/:classId/assign-trainers`
+
+**Request Body:**
+
+```json
+{
+  "trainer": ["67d417386802d97455f4396f"]
+}
+```
+
+---
+
+**API Endpoint: booking/create**  
+POST `/booking/create`
+
+**Request Body:**
+
+```json
+{
+  "classId": "67d41639f327fce331ae315d"
+}
+```
+
+---
+
+**API Endpoint: Cancel booking**  
+POST `/booking/cancel`
+
+**Request Body:**
+
+```json
+{
+  "bookingId": "67d417fd6802d97455f43993"
+}
+```
 
 ## API Endpoints
 
 ### Base URL
 
-The server runs at:  
+The server runs at:
 `http://localhost:8080/api/v1`
 
 For individual endpoints, refer to the sections below:
@@ -110,7 +237,23 @@ For individual endpoints, refer to the sections below:
 
 🔹 **Note:** Access to certain routes is restricted based on roles _(Admin, Trainer, Trainee)_. Ensure you authenticate before making requests.
 
-🔹 Also, I've putted a postman json on the project root file.
+🔹 Also, I've putted a postman json on the project root file.Or visit - [postman generated doc](https://documenter.getpostman.com/view/32331018/2sAYkBrfwy)
+
+## 🚀 Technologies Used
+
+This project is built using modern technologies to ensure security, scalability, and efficiency.
+
+| **Technology**           | **Description**                                  |
+| ------------------------ | ------------------------------------------------ |
+| **Express.js**           | Fast and minimalist web framework for Node.js    |
+| **MongoDB & Mongoose**   | NoSQL database and ODM for data modeling         |
+| **JSON Web Token (JWT)** | Secure authentication and authorization          |
+| **Bcrypt**               | Password hashing for enhanced security           |
+| **Zod**                  | Schema validation for request data               |
+| **Envalid**              | Environment variable validation                  |
+| **Moment.js**            | Date and time manipulation                       |
+| **Cors & Cookie-Parser** | Secure cross-origin requests and cookie handling |
+| **Dotenv**               | Manages environment variables                    |
 
 ## Database Design
 
