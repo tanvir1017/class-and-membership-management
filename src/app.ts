@@ -1,7 +1,6 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { Application } from "express";
-import corsOptions from "./app/config/corsOption";
 import credentials from "./app/middleware/credential";
 import globalErrorHandler from "./app/middleware/globalErrorHandler";
 import notFound from "./app/middleware/notFound";
@@ -18,7 +17,7 @@ app.use(express.json());
 app.use(credentials);
 
 // Cross Origin Resource Sharing
-app.use(cors(corsOptions));
+app.use(cors({ origin: true, credentials: true }));
 
 // built-in middleware to handle urlencoded form data
 app.use(express.urlencoded({ extended: false }));

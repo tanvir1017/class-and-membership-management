@@ -6,8 +6,10 @@ import { UserSchemaValidationZOD } from "../validation/user.validation";
 
 const router = Router();
 
-// TODO => Find only yourself
 router.route("/all").get(UserControllers.getAllUsers);
+
+// TODO => Find only yourself
+router.route("/me").get(UserControllers.getMe);
 
 router.route("/email/:email").get(UserControllers.getSingleUserByMail);
 // TODO => Update User

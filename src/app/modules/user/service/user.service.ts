@@ -1,5 +1,7 @@
 import { StatusCodes } from "http-status-codes";
+import env from "../../../config";
 import AppError from "../../../errors/appError";
+import { verifyToken } from "../../auth/utils/auth.utils";
 import { TUser } from "../interface/user.interface";
 import { User } from "../model/user.model";
 
@@ -7,6 +9,28 @@ import { User } from "../model/user.model";
 const getAllUsersFromDb = async () => {
   const allUsers = User.find();
   return allUsers;
+};
+
+// TODO =>  get individual information by them self
+const getMeFromDB = async (token: string) => {
+  const decodeToken = verifyToken(token, env.JWT_ACCESS_TOKEN);
+
+  const { userEmail, iat } = decodeToken;
+  const user = await User.isUserExistByEmail(userEmail);
+
+  //* check if user exists in DB by id
+  if (!user || user.isDeleted) {
+    throw new AppError(StatusCodes.NOT_FOUND, "user doesn't exist");
+  }
+
+  if (
+    user.passwordChangedAt &&
+    User.isJWTIssuedBeforePasswordChange(user.passwordChangedAt, iat as number)
+  ) {
+    throw new AppError(StatusCodes.UNAUTHORIZED, "You are not authorized");
+  }
+
+  return user;
 };
 
 // TODO =>  get individual information by them self
@@ -103,4 +127,5 @@ export const UserServices = {
   getUserFromDbById,
   getUserFromDbByEmail,
   changeRole,
+  getMeFromDB,
 };

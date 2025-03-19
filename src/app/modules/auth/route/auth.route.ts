@@ -11,11 +11,10 @@ router
     sanitizeClientDataViaZod(ValidateAuthUserViaZOD.validateLoginUser),
     AuthController.loginValidation,
   );
-router
-  .route("/refresh-token")
-  .post(
-    sanitizeClientDataViaZod(ValidateAuthUserViaZOD.refreshTokenValidation),
-    AuthController.refreshToken,
-  );
+
+router.route("/refresh-token").post(
+  // sanitizeClientDataViaZod(ValidateAuthUserViaZOD.refreshTokenValidation),
+  AuthController.refreshToken,
+);
 
 export const AuthRoutes = router;

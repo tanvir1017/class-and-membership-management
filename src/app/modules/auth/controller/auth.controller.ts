@@ -14,22 +14,19 @@ const loginValidation = asyncHandler(async (req, res) => {
     secure: env.isProd,
     httpOnly: true,
   });
-  res.cookie("accessToken", accessToken, {
-    secure: env.isProd,
-    httpOnly: true,
-  });
 
   sendResponse(res, {
     statuscode: httpStatus.OK,
     success: true,
-    message: "User logged in successfully", // returns a success message if the login is successful.
-    data: { accessToken, refreshToken }, // returns the validated user data or an error message if the login fails.
+    message: "User logged in successfully",
+    data: { accessToken }, // returns the validated user data or an error message if the login fails.
   });
 });
 
 // ** Refresh token
 const refreshToken = asyncHandler(async (req, res) => {
   const { refreshToken } = req.cookies;
+
   const result = await AuthServices.refreshTokenGenerate(refreshToken);
 
   sendResponse(res, {

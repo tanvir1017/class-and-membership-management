@@ -1,4 +1,4 @@
-import httpStatus from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 import env from "../../../config";
 import AppError from "../../../errors/appError";
 import { User } from "../../user/model/user.model";
@@ -10,12 +10,12 @@ const loginValidateUser = async (payload: TLoginUser) => {
   const user = await User.isUserExistByEmail(payload.email);
 
   if (!user) {
-    throw new AppError(400, "user doesn't exist");
+    throw new AppError(StatusCodes.NOT_FOUND, "user doesn't exist");
   }
 
   //* check if password is matched or not
   if (!(await User.isPasswordMatched(payload.password, user.password))) {
-    throw new AppError(400, "Password and user doesn't match");
+    throw new AppError(StatusCodes.UNAUTHORIZED, "wrong credentials!");
   }
 
   //* access granted and return token to client
@@ -47,27 +47,22 @@ const loginValidateUser = async (payload: TLoginUser) => {
 const refreshTokenGenerate = async (token: string) => {
   //* Verify token
 
-  const decoded = verifyToken(token, env.JWT_REFRESH_TOKEN as string);
+  const decoded = verifyToken(token, env.JWT_REFRESH_TOKEN);
 
   const { userEmail, iat } = decoded;
 
   const user = await User.isUserExistByEmail(userEmail);
 
   //* check if user exists in DB by id
-  if (!user) {
-    throw new AppError(httpStatus.NOT_FOUND, "user doesn't exist");
-  }
-
-  //* check if the user is deleted(soft) or not
-  if (user.isDeleted) {
-    throw new AppError(httpStatus.NOT_FOUND, "User is not exist maybe deleted");
+  if (!user || user.isDeleted) {
+    throw new AppError(StatusCodes.NOT_FOUND, "user doesn't exist");
   }
 
   if (
     user.passwordChangedAt &&
     User.isJWTIssuedBeforePasswordChange(user.passwordChangedAt, iat as number)
   ) {
-    throw new AppError(httpStatus.UNAUTHORIZED, "You are not authorized");
+    throw new AppError(StatusCodes.UNAUTHORIZED, "You are not authorized");
   }
 
   const jwtPayload = {

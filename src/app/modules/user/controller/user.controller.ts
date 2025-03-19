@@ -16,6 +16,20 @@ const getSingleUser = asyncHandler(async (req, res) => {
   });
 });
 
+const getMe = asyncHandler(async (req, res) => {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.split(" ")[1];
+
+  const result = await UserServices.getMeFromDB(token as string);
+
+  sendResponse(res, {
+    statuscode: httpStatus.OK,
+    success: true,
+    message: "User is retrieved successfully",
+    data: result,
+  });
+});
+
 // get single user by mail
 const getSingleUserByMail = asyncHandler(async (req, res) => {
   const { email } = req.params;
@@ -112,4 +126,5 @@ export const UserControllers = {
   getSingleUser,
   getSingleUserByMail,
   changeRole,
+  getMe,
 };
